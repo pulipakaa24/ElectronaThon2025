@@ -47,6 +47,10 @@ void loop() {
   }
 
   // Mark the pixels for each data point and connect them with lines
+  /* NOTE: any TFT commands take hella long so keep that in mind - 
+    in fact, you need to hold the button long enough for the program to 
+    pass these next couple of stages and get to the button detection part as of now.
+  */
   for(i = 0; i < 160/zoomScale; i++) {
     tft.fillCircle(voltReads[i], i*zoomScale, 0, ST7735_WHITE);
     if (i * zoomScale < 159) {
