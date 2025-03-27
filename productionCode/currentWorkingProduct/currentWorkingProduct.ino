@@ -61,17 +61,20 @@ void setup() {
 void loop() {
   vertScale = (double)analogRead(vertKnob) * 9.0 / 1023.0 + 1.0;
   unsigned short uReal[SAMPLES];
-  unsigned long delayTime = 10*analogRead(horKnob);
+  unsigned short delayTime = 10*analogRead(horKnob);
 
   float avg = 0;
   unsigned long begin;
   for (int i = 0; i < SAMPLES; i++) {
     begin = micros();
     uReal[i] = analogRead(posTerminal);
-    avg+=(float)uReal[i];
-    if (delayTime >= 10) delayMicroseconds((unsigned int)delayTime);  // Wait for the next sample (based on SAMPLING_FREQUENCY)
+    if (delayTime >= 10) delayMicroseconds(delayTime);  // Wait for the next sample (based on SAMPLING_FREQUENCY)
     // if delay is less than 10 us, there seem to be issues with the delay and how it shows up on LCD, so just remove delay.
     begin = micros() - begin;
+  }
+
+  for (int i = 0; i < SAMPLES; i++) {
+    avg+=(float)uReal[i];
   }
 
   avg /= (float)SAMPLES;
