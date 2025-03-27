@@ -1,4 +1,4 @@
-#include <arduinoFFT.h>
+ #include <arduinoFFT.h>
 #include <math.h>
 #include <TimerOne.h>
 #include <Adafruit_ST7735.h>
@@ -86,8 +86,8 @@ void loop() {
                   map((int)(uReal[i+1] * vertScale), -1*MAXVAL, MAXVAL, 0, 159), ST7735_BLUE);
   }
 
-  FFT.windowing(FFTWindow::Hamming, FFTDirection::Forward);  // Apply Hamming window
-  FFT.compute(FFTDirection::Forward);  // Perform FFT
+  
+  
 
   realResult(uReal, uImag, samplesIn, timeSpacing, SAMPLES_OUT, outResults);
 

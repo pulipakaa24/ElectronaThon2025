@@ -25,15 +25,9 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 float vReal[SAMPLES];
 float vImag[SAMPLES];
 
-// volatile bool signalState = LOW;
 const unsigned long debounceDelay = 500;
 volatile unsigned long lastPressText = 0;
 volatile unsigned long lastPressAxis = 0;
-
-// void toggleSignal() {
-//   signalState = !signalState;
-//   digitalWrite(signalPin, signalState);
-// }
 
 volatile unsigned char txt = 0;
 void togText() {
@@ -63,19 +57,6 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(toggleText), togText, RISING);
   attachInterrupt(digitalPinToInterrupt(selectAxis), selAxis, RISING);
 }
-
-// void realResult(double a[], double b[], int N, double t[], int samplesOut, double res[]) {
-//   for (int i = 0; i < samplesOut; i++) {
-//     double sum = 0.0;
-//     for (int n = 0; n < (N+1)/2; n++) {
-//       sum += a[n]*cos(2*M_PI*(double)n*t[i]) - b[n]*sin(2*M_PI*(double)n*t[i]);
-//     }
-//     for (int n = (N+1)/2; n < N; n++) {
-//       sum += a[n]*cos(2*M_PI*(double)(n - N)*t[i]) - b[n]*sin(2*M_PI*(double)(n - N)*t[i]);
-//     }
-//     res[i] = sum;
-//   }
-// }
 
 void loop() {
   vertScale = (double)analogRead(vertKnob) * 9.0 / 1023.0 + 1.0;
