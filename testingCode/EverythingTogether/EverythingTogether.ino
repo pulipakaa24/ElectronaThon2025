@@ -82,7 +82,7 @@ void loop() {
   float uReal[samplesIn];
   float uImag[samplesIn];
 
-  unsigned short delayTime = 10*constrain(map(readHor(0), 896, 0, 0, 1023), 0, 1023);
+  unsigned short delayTime = 10*constrain(map(readHor, 896, 0, 0, 1023), 0, 1023);
   // sampling frequency increases as potentiometer reading increases, until 7/8 of total.
   // after this point, the sample # changes as noted above, and FFT interpolation is used.
 

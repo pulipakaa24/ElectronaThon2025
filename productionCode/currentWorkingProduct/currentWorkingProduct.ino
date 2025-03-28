@@ -16,22 +16,23 @@
 #define toggleText 2
 #define selectAxis 3 
 
-double vertScale = 1.0;
+float vertScale = 1.0;
 bool axisToggle = false; // false for vertical axis labels, true for horizontal
 
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 
 // Array to hold the real and imaginary parts of the FFT
-float vReal[SAMPLES];
-float vImag[SAMPLES];
+float uReal[SAMPLES];
+float uImag[SAMPLES];
 
-const unsigned long debounceDelay = 500;
+const unsigned short debounceDelay = 500;
 volatile unsigned long lastPressText = 0;
 volatile unsigned long lastPressAxis = 0;
 
 volatile unsigned char txt = 0;
+unsigned long currentTime;
 void togText() {
-  unsigned long currentTime = millis();
+  currentTime = millis();
   if (currentTime - lastPressText > debounceDelay && txt < 2) txt++;
   else if (txt >= 2) txt = 0;
   lastPressText = currentTime;
@@ -39,7 +40,7 @@ void togText() {
 
 volatile bool axis = false; // true for vertical (voltage), false for horizontal (time)
 void selAxis() {
-  unsigned long currentTime = millis();
+  currentTime = millis();
   if (currentTime - lastPressAxis > debounceDelay) axis = !axis;
   lastPressAxis = currentTime;
 }
@@ -59,41 +60,47 @@ void setup() {
 }
 
 void loop() {
-  vertScale = (double)analogRead(vertKnob) * 9.0 / 1023.0 + 1.0;
-  unsigned short uReal[SAMPLES];
+  vertScale = (float)analogRead(vertKnob) * 9.0 / 1023.0 + 1.0;
   unsigned short delayTime = 10*analogRead(horKnob);
 
-  float avg = 0;
+  float avg = 0.0;
   unsigned long begin;
   for (int i = 0; i < SAMPLES; i++) {
     begin = micros();
-    uReal[i] = analogRead(posTerminal);
+    uReal[i] = (float)analogRead(posTerminal);
     if (delayTime >= 10) delayMicroseconds(delayTime);  // Wait for the next sample (based on SAMPLING_FREQUENCY)
     // if delay is less than 10 us, there seem to be issues with the delay and how it shows up on LCD, so just remove delay.
     begin = micros() - begin;
   }
 
+  for (int16_t i = 0; i < SAMPLES - 1; i++) {
+    tft.drawLine(i, map((int)(uReal[i] * vertScale), 2047, 0, 0, 159), (i+1), 
+                  map((int)(uReal[i+1] * vertScale), 2047, 0, 0, 159), ST7735_RED);
+  }
+
+  delay(100);
+
   for (int i = 0; i < SAMPLES; i++) {
-    avg+=(float)uReal[i];
+    avg+=uReal[i];
   }
 
   avg /= (float)SAMPLES;
 
   unsigned long trueFreq = 1000000 / begin;
-  double t_TOTms = 1000.0*(double)SAMPLES/(double)trueFreq;
+  float t_TOTms = 1000.0*(double)SAMPLES/(double)trueFreq;
 
-  ArduinoFFT<float> FFT = ArduinoFFT<float>(vReal, vImag, SAMPLES, trueFreq);
+  ArduinoFFT<float> FFT = ArduinoFFT<float>(uReal, uImag, SAMPLES, trueFreq);
   for (int i = 0; i < SAMPLES; i++) {
-    vReal[i] = (float)uReal[i] - avg;
-    vImag[i] = 0;
+    uReal[i] = uReal[i] - avg;
+    uImag[i] = 0;
   }
 
   FFT.windowing(FFTWindow::Hamming, FFTDirection::Forward);  // Apply Hamming window
   FFT.compute(FFTDirection::Forward);  // Perform FFT
   FFT.complexToMagnitude();
   float peak = FFT.majorPeak();
-
-  tft.fillScreen(0);
+  Serial.println(String(vertScale, 2));
+  tft.fillScreen(ST7735_BLACK);
   if (txt == 0) {
     if (axis) {
       tft.setCursor(0, 150);
@@ -129,11 +136,4 @@ void loop() {
     tft.print(String((int)peak));
     tft.print("Hz");
   }
-
-  for (int i = 0; i < SAMPLES - 1; i++) {
-    tft.drawLine(i, map((int)((double)uReal[i] * vertScale), 2047, 0, 0, 159), (i+1), 
-                  map((int)((double)uReal[i+1] * vertScale), 2047, 0, 0, 159), ST7735_RED);
-  }
-
-  delay(100);
 }
