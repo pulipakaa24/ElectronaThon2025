@@ -1,6 +1,6 @@
 #include <TimerOne.h>
 
-#define SQUAREWAVE_FREQ 800
+#define SQUAREWAVE_FREQ 200
 
 volatile bool signalState = LOW;
 void toggleSignal() {
